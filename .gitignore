@@ -1,0 +1,21 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+
+# Data (optionnel si tu veux commiter le CSV sample)
+# data/*.csv
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
