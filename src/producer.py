@@ -19,22 +19,31 @@ def delivery_report(err, msg):
     """
     Callback for message delivery reports.
     Called once for each message produced to indicate delivery result.
+    
+    Args:
+        err: Error object if delivery failed, None otherwise
+        msg: Message object with metadata (topic, partition, offset)
     """
     if err is not None:
         print(f"❌ Message delivery failed: {err}")
     else:
-        # Uncomment for verbose logging
+        # Uncomment for verbose logging per message
         # print(f"✅ Message delivered to {msg.topic()} [{msg.partition()}] @ offset {msg.offset()}")
         pass
 
 def create_producer():
-    """Initialize Kafka producer"""
+    """
+    Initialize Kafka producer with confluent-kafka.
+    
+    Returns:
+        Producer: Configured Kafka producer instance
+    """
     conf = {
         'bootstrap.servers': KAFKA_BROKER,
         'client.id': 'market-indices-producer',
-        'acks': 'all',  # Wait for all replicas
-        'retries': 3,
-        'max.in.flight.requests.per.connection': 1  # Ensure ordering
+        'acks': 'all',  # Wait for all replicas to acknowledge
+        'retries': 3,   # Retry failed sends up to 3 times
+        'max.in.flight.requests.per.connection': 1  # Ensure message ordering
     }
     
     try:
@@ -47,12 +56,15 @@ def create_producer():
 
 def send_market_data(producer, csv_path, delay=0):
     """
-    Read CSV and send each row as a JSON message to Kafka
+    Read CSV and send each row as a JSON message to Kafka.
     
     Args:
         producer: Producer instance
         csv_path: Path to CSV file
         delay: Delay in seconds between messages (for streaming simulation)
+    
+    Returns:
+        tuple: (messages_sent, errors)
     """
     messages_sent = 0
     errors = 0
@@ -84,14 +96,19 @@ def send_market_data(producer, csv_path, delay=0):
                     )
                     
                     # Trigger delivery reports by polling
+                    # This processes I/O events and invokes callbacks
                     producer.poll(0)
                     
                     messages_sent += 1
+
+                    # NEW: simulate streaming with 1 second delay
+                    time.sleep(1.0)
                     
+                    # Progress indicator every 10 messages
                     if messages_sent % 10 == 0:
                         print(f"✉️  Sent {messages_sent} messages (last: {message['symbol']} @ {message['price']})")
                     
-                    # Simulate streaming with delay
+                    # Simulate streaming with delay (used in US2-T4)
                     if delay > 0:
                         time.sleep(delay)
                         
