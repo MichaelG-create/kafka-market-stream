@@ -13,6 +13,9 @@ __pycache__/
 # Data (optionnel si tu veux commiter le CSV sample)
 # data/*.csv
 
+# Project Action plan
+ACTION/
+
 # Logs
 *.log
 
