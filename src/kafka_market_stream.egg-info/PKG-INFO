@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: kafka-market-stream
+Version: 0.1.0
+Summary: Add your description here
+Requires-Python: >=3.14
+Description-Content-Type: text/markdown
+Requires-Dist: confluent-kafka>=2.12.2
+Requires-Dist: duckdb>=1.4.3

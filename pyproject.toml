@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "kafka-market-stream"
 version = "0.1.0"
@@ -8,3 +12,9 @@ dependencies = [
     "confluent-kafka>=2.12.2",
     "duckdb>=1.4.3",
 ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
