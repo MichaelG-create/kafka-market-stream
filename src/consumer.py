@@ -2,6 +2,11 @@
 US3-T2: Kafka consumer that reads from topic `market_indices_raw`
 and inserts rows into DuckDB table `market_ticks`.
 """
+# Metrics defintion:
+# - **messages_processed**: total number of messages successfully consumed from topic `market_indices_raw` and inserted into `market_ticks` during a single consumer run.
+# - **errors**: total number of messages that failed during processing in this run (JSON parsing error, schema/validation error, or DuckDB insert failure).
+# - **elapsed_seconds**: wall‑clock duration of the consumer run in seconds, from just before the first poll to just after the last message is processed (end_time − start_time).
+# - **max_timestamp**: maximum tick timestamp observed among all successfully processed messages in this run, used as a freshness indicator for the ingested data.
 
 import json
 import os
