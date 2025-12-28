@@ -1,3 +1,5 @@
+import signal
+
 from market_streaming.application.consumer_services import (
     MarketTickConsumerService,
 )
@@ -10,6 +12,16 @@ from market_streaming.cli_helpers import print_run_metrics
 
 
 DB_PATH = "data/market_data.duckdb"
+
+# Part to handle forced closing of main_consumer script by bash script
+running = True
+
+def handle_signal(signum, frame):
+    global running
+    running = False
+
+signal.signal(signal.SIGINT, handle_signal)
+signal.signal(signal.SIGTERM, handle_signal)
 
 
 def build_consumer_service() -> MarketTickConsumerService:
@@ -33,7 +45,14 @@ def build_consumer_service() -> MarketTickConsumerService:
 
 def main() -> None:
     service = build_consumer_service()
-    metrics = service.run()
+
+    def should_run() -> bool:
+        return running  # uses signal-handled flag
+
+    metrics = service.run(
+        should_run=should_run,
+        idle_timeout_seconds=5.0,
+    )
     print_run_metrics(metrics)
 
 

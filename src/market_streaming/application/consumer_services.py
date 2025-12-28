@@ -1,7 +1,7 @@
 import json
 import time
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Callable
 
 from market_streaming.domain.models import MarketTick
 from market_streaming.application.ports import (
@@ -28,7 +28,15 @@ class MarketTickConsumerService:
         self._metrics_sink = metrics_sink
         self._logger = logger
 
-    def run(self, max_messages: Optional[int] = None) -> RunMetrics:
+    def run(
+        self,
+        max_messages: Optional[int] = None,
+        should_run: Optional[Callable[[], bool]] = None,
+        idle_timeout_seconds: Optional[float] = None,
+    ) -> RunMetrics:
+        if should_run is None:
+            should_run = lambda: True
+
         messages_processed = 0
         errors = 0
         max_timestamp: Optional[str] = None
@@ -36,21 +44,37 @@ class MarketTickConsumerService:
         start_time = time.time()
         run_started_at = datetime.utcnow().isoformat()
 
-        # structured start log
         self._logger.info(
             "pipeline_start",
             {
                 "run_started_at": run_started_at,
                 "max_messages": max_messages,
+                "idle_timeout_seconds": idle_timeout_seconds,
             },
         )
 
+        idle_since: Optional[float] = None
+
         try:
-            while True:
+            while should_run():
                 raw = self._consumer.poll(timeout=1.0)
 
                 if raw is None:
+                    # no message this poll → track idle period
+                    if idle_timeout_seconds is not None:
+                        now = time.time()
+                        if idle_since is None:
+                            idle_since = now
+                        elif now - idle_since >= idle_timeout_seconds:
+                            print(
+                                f"ℹ️  No messages for {idle_timeout_seconds} s, "
+                                "stopping consumer."
+                            )
+                            break
                     continue
+
+                # got a message → reset idle timer
+                idle_since = None
 
                 try:
                     payload = raw.decode("utf-8")
@@ -71,7 +95,6 @@ class MarketTickConsumerService:
                         max_timestamp = ts
 
                     if messages_processed % 10 == 0:
-                        # keep a lightweight console hint if you like
                         print(
                             f"✅ Inserted {messages_processed} messages "
                             f"(last: {tick.symbol} @ {tick.price})"
@@ -83,7 +106,6 @@ class MarketTickConsumerService:
 
                 except Exception as exc:
                     errors += 1
-                    # structured error log for individual message failures
                     self._logger.error(
                         "message_processing_error",
                         {
@@ -110,10 +132,8 @@ class MarketTickConsumerService:
                 max_timestamp=max_timestamp,
             )
 
-            # persist metrics (US4-T3)
             self._metrics_sink.insert_run_metrics(metrics)
 
-            # structured end log (US4-T4)
             self._logger.info(
                 "pipeline_end",
                 {
@@ -123,6 +143,7 @@ class MarketTickConsumerService:
                     "messages_processed": messages_processed,
                     "errors": errors,
                     "max_timestamp": max_timestamp,
+                    "idle_timeout_seconds": idle_timeout_seconds,
                 },
             )
 
