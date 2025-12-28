@@ -6,3 +6,7 @@ Requires-Python: >=3.14
 Description-Content-Type: text/markdown
 Requires-Dist: confluent-kafka>=2.12.2
 Requires-Dist: duckdb>=1.4.3
+Requires-Dist: ipykernel>=7.1.0
+Requires-Dist: notebook>=7.5.1
+Requires-Dist: numpy>=2.4.0
+Requires-Dist: pandas>=2.3.3

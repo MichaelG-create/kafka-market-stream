@@ -6,6 +6,7 @@ src/kafka_market_stream.egg-info/dependency_links.txt
 src/kafka_market_stream.egg-info/requires.txt
 src/kafka_market_stream.egg-info/top_level.txt
 src/market_streaming/__init__.py
+src/market_streaming/cli_helpers.py
 src/market_streaming/main_consumer.py
 src/market_streaming/main_producer.py
 src/market_streaming/application/__init__.py
@@ -16,6 +17,8 @@ src/market_streaming/domain/__init__.py
 src/market_streaming/domain/models.py
 src/market_streaming/infrastructure/__init__.py
 src/market_streaming/infrastructure/csv_tick_source.py
+src/market_streaming/infrastructure/duckdb_metrics_repository.py
 src/market_streaming/infrastructure/duckdb_repository.py
+src/market_streaming/infrastructure/json_file_logger.py
 src/market_streaming/infrastructure/kafka_consumer.py
 src/market_streaming/infrastructure/kafka_tick_publisher.py
