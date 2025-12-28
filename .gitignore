@@ -12,6 +12,7 @@ __pycache__/
 
 # Data (optionnel si tu veux commiter le CSV sample)
 # data/*.csv
+data/market_data.duckdb
 
 # Project Action plan
 ACTION/
