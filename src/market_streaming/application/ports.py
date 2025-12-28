@@ -48,3 +48,9 @@ class RunMetrics:
     messages_processed: int
     errors: int
     max_timestamp: Optional[str]
+
+class MetricsSink(Protocol):
+    """Port for persisting run-level pipeline metrics."""
+
+    def insert_run_metrics(self, metrics: RunMetrics) -> None:
+        ...

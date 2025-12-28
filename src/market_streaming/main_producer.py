@@ -14,7 +14,7 @@ def build_producer_service() -> MarketTickProducerService:
     return MarketTickProducerService(
         source=source,
         publisher=publisher,
-        delay_seconds=1.0,      # your US2-T4 delay
+        delay_seconds=0.1,      # your US2-T4 delay
         progress_interval=10,
     )
 
