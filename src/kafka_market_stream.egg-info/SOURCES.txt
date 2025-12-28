@@ -22,3 +22,4 @@ src/market_streaming/infrastructure/duckdb_repository.py
 src/market_streaming/infrastructure/json_file_logger.py
 src/market_streaming/infrastructure/kafka_consumer.py
 src/market_streaming/infrastructure/kafka_tick_publisher.py
+tests/test_pipeline_integration.py

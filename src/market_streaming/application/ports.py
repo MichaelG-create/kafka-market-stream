@@ -39,6 +39,10 @@ class TickSink(Protocol):
     def insert_tick(self, tick: MarketTick) -> None:
         ...
 
+    def close(self) -> None:
+        ...
+
+
 
 @dataclass
 class RunMetrics:
@@ -55,8 +59,13 @@ class MetricsSink(Protocol):
     def insert_run_metrics(self, metrics: RunMetrics) -> None:
         ...
 
+    def close(self) -> None:
+        ...
+    
+
 class LoggerPort(Protocol):
     def info(self, event: str, fields: Optional[Mapping[str, Any]] = None) -> None: 
         ...
+
     def error(self, event: str, fields: Optional[Mapping[str, Any]] = None) -> None: 
         ...

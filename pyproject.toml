@@ -23,3 +23,14 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: integration tests",
+]
+
+[dependency-groups]
+dev = [
+    "docker>=7.1.0",
+    "pytest>=9.0.2",
+]

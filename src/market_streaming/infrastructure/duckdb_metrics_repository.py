@@ -5,10 +5,10 @@ from market_streaming.application.ports import RunMetrics, MetricsSink
 
 
 class DuckDBMetricsRepository(MetricsSink):
-    def __init__(self, db_path: str = "data/market_data.duckdb") -> None:
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        self._db_path = db_path
-        self._con = duckdb.connect(db_path)
+    def __init__(self) -> None:
+        self.db_path = os.getenv("MARKET_DB_PATH", "data/market_data.duckdb")
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        self._con = duckdb.connect(self.db_path)
         self._con.execute(
             """
             CREATE TABLE IF NOT EXISTS pipeline_metrics (
@@ -21,7 +21,7 @@ class DuckDBMetricsRepository(MetricsSink):
             );
             """
         )
-        print(f"✅ DuckDB metrics repository ready at {db_path}")
+        print(f"✅ DuckDB metrics repository ready at {self.db_path}")
 
     def insert_run_metrics(self, metrics: RunMetrics) -> None:
         self._con.execute(

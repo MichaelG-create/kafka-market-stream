@@ -7,9 +7,10 @@ from market_streaming.application.ports import TickSink
 
 
 class DuckDBTickRepository(TickSink):
-    def __init__(self, db_path: str = "data/market_data.duckdb") -> None:
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        self._con = duckdb.connect(db_path)
+    def __init__(self) -> None:
+        self.db_path = os.getenv("MARKET_DB_PATH", "data/market_data.duckdb")
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        self._con = duckdb.connect(self.db_path)
         self._con.execute(
             """
             CREATE TABLE IF NOT EXISTS market_ticks (
@@ -20,7 +21,7 @@ class DuckDBTickRepository(TickSink):
             );
             """
         )
-        print(f"✅ DuckDB connected at {db_path}")
+        print(f"✅ DuckDB connected at {self.db_path}")
 
     def insert_tick(self, tick: MarketTick) -> None:
         self._con.execute(

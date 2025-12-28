@@ -32,7 +32,7 @@ class MarketTickConsumerService:
         self,
         max_messages: Optional[int] = None,
         should_run: Optional[Callable[[], bool]] = None,
-        idle_timeout_seconds: Optional[float] = None,
+        idle_timeout_seconds: float = 60.0,
     ) -> RunMetrics:
         if should_run is None:
             should_run = lambda: True
@@ -119,6 +119,8 @@ class MarketTickConsumerService:
             print("\n⚠️  Interrupted by user")
         finally:
             self._consumer.close()
+            self._sink.close()  
+            self._metrics_sink.close()
             end_time = time.time()
             run_ended_at = datetime.utcnow().isoformat()
             elapsed_seconds = end_time - start_time
