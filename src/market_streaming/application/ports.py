@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterable, Protocol, Dict, Any, Optional
+from typing import Iterable, Protocol, Dict, Any, Optional, Mapping
 
 from market_streaming.domain.models import MarketTick
 
@@ -53,4 +53,10 @@ class MetricsSink(Protocol):
     """Port for persisting run-level pipeline metrics."""
 
     def insert_run_metrics(self, metrics: RunMetrics) -> None:
+        ...
+
+class LoggerPort(Protocol):
+    def info(self, event: str, fields: Optional[Mapping[str, Any]] = None) -> None: 
+        ...
+    def error(self, event: str, fields: Optional[Mapping[str, Any]] = None) -> None: 
         ...

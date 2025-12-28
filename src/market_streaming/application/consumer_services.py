@@ -8,15 +8,25 @@ from market_streaming.application.ports import (
     MessageConsumer,
     TickSink,
     RunMetrics,
+    MetricsSink,
+    LoggerPort,
 )
 
 
 class MarketTickConsumerService:
-    """Consume raw messages, convert to MarketTick, insert via TickSink, return run metrics."""
+    """Consume raw messages, convert to MarketTick, insert via TickSink, record metrics and logs."""
 
-    def __init__(self, consumer: MessageConsumer, sink: TickSink) -> None:
+    def __init__(
+        self,
+        consumer: MessageConsumer,
+        sink: TickSink,
+        metrics_sink: MetricsSink,
+        logger: LoggerPort,
+    ) -> None:
         self._consumer = consumer
         self._sink = sink
+        self._metrics_sink = metrics_sink
+        self._logger = logger
 
     def run(self, max_messages: Optional[int] = None) -> RunMetrics:
         messages_processed = 0
@@ -25,6 +35,15 @@ class MarketTickConsumerService:
 
         start_time = time.time()
         run_started_at = datetime.utcnow().isoformat()
+
+        # structured start log
+        self._logger.info(
+            "pipeline_start",
+            {
+                "run_started_at": run_started_at,
+                "max_messages": max_messages,
+            },
+        )
 
         try:
             while True:
@@ -52,6 +71,7 @@ class MarketTickConsumerService:
                         max_timestamp = ts
 
                     if messages_processed % 10 == 0:
+                        # keep a lightweight console hint if you like
                         print(
                             f"✅ Inserted {messages_processed} messages "
                             f"(last: {tick.symbol} @ {tick.price})"
@@ -62,8 +82,16 @@ class MarketTickConsumerService:
                         break
 
                 except Exception as exc:
-                    print(f"❌ Error processing message: {exc}")
                     errors += 1
+                    # structured error log for individual message failures
+                    self._logger.error(
+                        "message_processing_error",
+                        {
+                            "error": str(exc),
+                            "messages_processed": messages_processed,
+                            "errors": errors,
+                        },
+                    )
 
         except KeyboardInterrupt:
             print("\n⚠️  Interrupted by user")
@@ -73,21 +101,29 @@ class MarketTickConsumerService:
             run_ended_at = datetime.utcnow().isoformat()
             elapsed_seconds = end_time - start_time
 
-        return RunMetrics(
-            run_started_at=run_started_at,
-            run_ended_at=run_ended_at,
-            elapsed_seconds=elapsed_seconds,
-            messages_processed=messages_processed,
-            errors=errors,
-            max_timestamp=max_timestamp,
-        )
+            metrics = RunMetrics(
+                run_started_at=run_started_at,
+                run_ended_at=run_ended_at,
+                elapsed_seconds=elapsed_seconds,
+                messages_processed=messages_processed,
+                errors=errors,
+                max_timestamp=max_timestamp,
+            )
 
+            # persist metrics (US4-T3)
+            self._metrics_sink.insert_run_metrics(metrics)
 
-def log_run_metrics(metrics: RunMetrics) -> None:
-    print("\n📊 Run summary (US4):")
-    print(f"   run_started_at:     {metrics.run_started_at}")
-    print(f"   run_ended_at:       {metrics.run_ended_at}")
-    print(f"   elapsed_seconds:    {metrics.elapsed_seconds:.2f}")
-    print(f"   messages_processed: {metrics.messages_processed}")
-    print(f"   errors:             {metrics.errors}")
-    print(f"   max_timestamp:      {metrics.max_timestamp}")
+            # structured end log (US4-T4)
+            self._logger.info(
+                "pipeline_end",
+                {
+                    "run_started_at": run_started_at,
+                    "run_ended_at": run_ended_at,
+                    "elapsed_seconds": elapsed_seconds,
+                    "messages_processed": messages_processed,
+                    "errors": errors,
+                    "max_timestamp": max_timestamp,
+                },
+            )
+
+        return metrics
