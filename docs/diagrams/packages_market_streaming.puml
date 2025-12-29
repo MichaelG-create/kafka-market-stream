@@ -1,0 +1,60 @@
+@startuml packages_market_streaming
+set namespaceSeparator none
+package "market_streaming" as market_streaming {
+}
+package "market_streaming.application" as market_streaming.application {
+}
+package "market_streaming.application.consumer_services" as market_streaming.application.consumer_services {
+}
+package "market_streaming.application.ports" as market_streaming.application.ports {
+}
+package "market_streaming.application.producer_services" as market_streaming.application.producer_services {
+}
+package "market_streaming.cli_helpers" as market_streaming.cli_helpers {
+}
+package "market_streaming.domain" as market_streaming.domain {
+}
+package "market_streaming.domain.models" as market_streaming.domain.models {
+}
+package "market_streaming.infrastructure" as market_streaming.infrastructure {
+}
+package "market_streaming.infrastructure.csv_tick_source" as market_streaming.infrastructure.csv_tick_source {
+}
+package "market_streaming.infrastructure.duckdb_metrics_repository" as market_streaming.infrastructure.duckdb_metrics_repository {
+}
+package "market_streaming.infrastructure.duckdb_repository" as market_streaming.infrastructure.duckdb_repository {
+}
+package "market_streaming.infrastructure.json_file_logger" as market_streaming.infrastructure.json_file_logger {
+}
+package "market_streaming.infrastructure.kafka_consumer" as market_streaming.infrastructure.kafka_consumer {
+}
+package "market_streaming.infrastructure.kafka_tick_publisher" as market_streaming.infrastructure.kafka_tick_publisher {
+}
+package "market_streaming.main_consumer" as market_streaming.main_consumer {
+}
+package "market_streaming.main_producer" as market_streaming.main_producer {
+}
+market_streaming.application.consumer_services --> market_streaming.application.ports
+market_streaming.application.consumer_services --> market_streaming.domain.models
+market_streaming.application.ports --> market_streaming.domain.models
+market_streaming.application.producer_services --> market_streaming.domain.models
+market_streaming.cli_helpers --> market_streaming.application.ports
+market_streaming.infrastructure.csv_tick_source --> market_streaming.application.producer_services
+market_streaming.infrastructure.csv_tick_source --> market_streaming.domain.models
+market_streaming.infrastructure.duckdb_metrics_repository --> market_streaming.application.ports
+market_streaming.infrastructure.duckdb_repository --> market_streaming.application.ports
+market_streaming.infrastructure.duckdb_repository --> market_streaming.domain.models
+market_streaming.infrastructure.json_file_logger --> market_streaming.application.ports
+market_streaming.infrastructure.kafka_consumer --> market_streaming.application.ports
+market_streaming.infrastructure.kafka_tick_publisher --> market_streaming.application.producer_services
+market_streaming.infrastructure.kafka_tick_publisher --> market_streaming.domain.models
+market_streaming.main_consumer --> market_streaming.application.consumer_services
+market_streaming.main_consumer --> market_streaming.cli_helpers
+market_streaming.main_consumer --> market_streaming.infrastructure.duckdb_metrics_repository
+market_streaming.main_consumer --> market_streaming.infrastructure.duckdb_repository
+market_streaming.main_consumer --> market_streaming.infrastructure.json_file_logger
+market_streaming.main_consumer --> market_streaming.infrastructure.kafka_consumer
+market_streaming.main_producer --> market_streaming.application.producer_services
+market_streaming.main_producer --> market_streaming.infrastructure.csv_tick_source
+market_streaming.main_producer --> market_streaming.infrastructure.kafka_tick_publisher
+@enduml

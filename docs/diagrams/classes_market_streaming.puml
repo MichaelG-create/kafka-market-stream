@@ -1,0 +1,86 @@
+@startuml classes_market_streaming
+set namespaceSeparator none
+class "ConfluentKafkaMessageConsumer" as market_streaming.infrastructure.kafka_consumer.ConfluentKafkaMessageConsumer {
+  close() -> None
+  poll(timeout: float) -> Optional[bytes]
+}
+class "ConfluentKafkaTickPublisher" as market_streaming.infrastructure.kafka_tick_publisher.ConfluentKafkaTickPublisher {
+  flush() -> None
+  publish(tick: MarketTick) -> None
+}
+class "CsvTickSource" as market_streaming.infrastructure.csv_tick_source.CsvTickSource {
+  read_ticks() -> Iterable[MarketTick]
+}
+class "DuckDBMetricsRepository" as market_streaming.infrastructure.duckdb_metrics_repository.DuckDBMetricsRepository {
+  db_path : NoneType
+  insert_run_metrics(metrics: RunMetrics) -> None
+}
+class "DuckDBTickRepository" as market_streaming.infrastructure.duckdb_repository.DuckDBTickRepository {
+  db_path : NoneType
+  insert_tick(tick: MarketTick) -> None
+}
+class "JsonFileLogger" as market_streaming.infrastructure.json_file_logger.JsonFileLogger {
+  error(event: str, fields: Optional[Mapping[str, Any]]) -> None
+  info(event: str, fields: Optional[Mapping[str, Any]]) -> None
+}
+class "LoggerPort" as market_streaming.application.ports.LoggerPort {
+  error(event: str, fields: Optional[Mapping[str, Any]]) -> None
+  info(event: str, fields: Optional[Mapping[str, Any]]) -> None
+}
+class "MarketDataSource" as market_streaming.application.ports.MarketDataSource {
+  read_ticks() -> Iterable[MarketTick]
+}
+class "MarketTick" as market_streaming.domain.models.MarketTick {
+  price : float
+  symbol : str
+  timestamp : str
+  volume : int
+  to_dict() -> Dict[str, Any]
+}
+class "MarketTickConsumerService" as market_streaming.application.consumer_services.MarketTickConsumerService {
+  run(max_messages: Optional[int], should_run: Optional[Callable[[], bool]], idle_timeout_seconds: float) -> RunMetrics
+}
+class "MarketTickProducerService" as market_streaming.application.producer_services.MarketTickProducerService {
+  run() -> tuple[int, int]
+}
+class "MessageConsumer" as market_streaming.application.ports.MessageConsumer {
+  close() -> None
+  {abstract}poll(timeout: float) -> Optional[bytes]
+}
+class "MessagePublisher" as market_streaming.application.ports.MessagePublisher {
+  flush() -> None
+  publish(payload: bytes) -> None
+}
+class "MessageSerializer" as market_streaming.application.ports.MessageSerializer {
+  serialize(tick: MarketTick) -> bytes
+}
+class "MetricsSink" as market_streaming.application.ports.MetricsSink {
+  close() -> None
+  insert_run_metrics(metrics: RunMetrics) -> None
+}
+class "RunMetrics" as market_streaming.application.ports.RunMetrics {
+  elapsed_seconds : float
+  errors : int
+  max_timestamp : Optional[str]
+  messages_processed : int
+  run_ended_at : str
+  run_started_at : str
+}
+class "TickPublisher" as market_streaming.application.producer_services.TickPublisher {
+  flush() -> None
+  publish(tick: MarketTick) -> None
+}
+class "TickSink" as market_streaming.application.ports.TickSink {
+  close() -> None
+  insert_tick(tick: MarketTick) -> None
+}
+class "TickSource" as market_streaming.application.producer_services.TickSource {
+  read_ticks() -> Iterable[MarketTick]
+}
+market_streaming.infrastructure.csv_tick_source.CsvTickSource --|> market_streaming.application.producer_services.TickSource
+market_streaming.infrastructure.duckdb_metrics_repository.DuckDBMetricsRepository --|> market_streaming.application.ports.MetricsSink
+market_streaming.infrastructure.duckdb_repository.DuckDBTickRepository --|> market_streaming.application.ports.TickSink
+market_streaming.infrastructure.json_file_logger.JsonFileLogger --|> market_streaming.application.ports.LoggerPort
+market_streaming.infrastructure.kafka_consumer.ConfluentKafkaMessageConsumer --|> market_streaming.application.ports.MessageConsumer
+market_streaming.infrastructure.kafka_tick_publisher.ConfluentKafkaTickPublisher --|> market_streaming.application.producer_services.TickPublisher
+@enduml
