@@ -1,0 +1,26 @@
+services:
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - duckdb
+
+  duckdb:
+    image: duckdb/duckdb:latest
+    ports:
+      - "9920:9920"
+    volumes:
+      - .:/workspace
+    command: >
+      duckdb 
+      --http 
+      --port 9920
+      /workspace/data/market_data.duckdb
+
+volumes:
+  grafana-data:
