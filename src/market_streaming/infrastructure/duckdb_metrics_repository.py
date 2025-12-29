@@ -23,28 +23,32 @@ class DuckDBMetricsRepository(MetricsSink):
         )
         print(f"✅ DuckDB metrics repository ready at {self.db_path}")
 
-    def insert_run_metrics(self, metrics: RunMetrics) -> None:
-        self._con.execute(
-            """
-            INSERT INTO pipeline_metrics (
-                run_started_at,
-                run_ended_at,
-                elapsed_seconds,
-                messages_processed,
-                errors,
-                max_timestamp
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            [
-                metrics.run_started_at,
-                metrics.run_ended_at,
-                float(metrics.elapsed_seconds),
-                int(metrics.messages_processed),
-                int(metrics.errors),
-                metrics.max_timestamp,
-            ],
-        )
+    def _get_connection(self):
+        return duckdb.connect(self.db_path)
 
-    def close(self) -> None:
-        self._con.close()
+    def insert_run_metrics(self, metrics: RunMetrics) -> None:
+        with self._get_connection() as con:
+            con.execute(
+                """
+                INSERT INTO pipeline_metrics (
+                    run_started_at,
+                    run_ended_at,
+                    elapsed_seconds,
+                    messages_processed,
+                    errors,
+                    max_timestamp
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    metrics.run_started_at,
+                    metrics.run_ended_at,
+                    float(metrics.elapsed_seconds),
+                    int(metrics.messages_processed),
+                    int(metrics.errors),
+                    metrics.max_timestamp,
+                ],
+            )
+
+    # def close(self) -> None:
+    #     self._con.close()

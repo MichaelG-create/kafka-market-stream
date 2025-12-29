@@ -44,7 +44,7 @@ def main() -> None:
 
     metrics = service.run(
         should_run=should_run,
-        idle_timeout_seconds=60.0,
+        idle_timeout_seconds=30.0,
     )
     print_run_metrics(metrics)
 

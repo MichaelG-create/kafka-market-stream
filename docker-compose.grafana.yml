@@ -1,3 +1,4 @@
+# docker-compose.grafana.yaml
 services:
   grafana:
     image: grafana/grafana:latest
@@ -5,22 +6,15 @@ services:
       - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    depends_on:
-      - duckdb
+      - ./data:/data:ro
 
-  duckdb:
-    image: duckdb/duckdb:latest
+  duckdb-api:  # Fixed name!
+    build: ./api
     ports:
-      - "9920:9920"
+      - "8080:8080"
     volumes:
-      - .:/workspace
-    command: >
-      duckdb 
-      --http 
-      --port 9920
-      /workspace/data/market_data.duckdb
+      - ./data:/data
+    restart: unless-stopped
 
 volumes:
   grafana-data:

@@ -11,6 +11,7 @@ requires-python = ">=3.14"
 dependencies = [
     "confluent-kafka>=2.12.2",
     "duckdb>=1.4.3",
+    "flask>=3.1.2",
     "ipykernel>=7.1.0",
     "matplotlib>=3.10.8",
     "notebook>=7.5.1",

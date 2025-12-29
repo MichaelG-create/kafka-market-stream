@@ -1,0 +1,3 @@
+duckdb
+flask
+flask-cors

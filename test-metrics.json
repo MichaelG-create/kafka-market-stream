@@ -1,0 +1,5 @@
+[
+  {"symbol": "SP500", "tick_count": 250, "avg_price": 4692.86},
+  {"symbol": "STOXX600", "tick_count": 250, "avg_price": 3813.24},
+  {"symbol": "NIKKEI225", "tick_count": 250, "avg_price": 4019.41}
+]
