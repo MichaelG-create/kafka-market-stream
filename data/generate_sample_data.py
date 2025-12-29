@@ -11,18 +11,20 @@ rows = []
 for symbol in symbols:
     current_time = start_date
     base_price = random.uniform(3000, 5000)
-    
+
     for i in range(50):
         price = base_price + random.uniform(-50, 50)
         volume = random.randint(100000, 500000)
-        
-        rows.append({
-            "timestamp": current_time.isoformat(),
-            "symbol": symbol,
-            "price": round(price, 2),
-            "volume": volume
-        })
-        
+
+        rows.append(
+            {
+                "timestamp": current_time.isoformat(),
+                "symbol": symbol,
+                "price": round(price, 2),
+                "volume": volume,
+            }
+        )
+
         current_time += timedelta(minutes=5)
 
 # Écrire le CSV

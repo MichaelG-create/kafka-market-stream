@@ -37,4 +37,4 @@ class DuckDBTickRepository(TickSink):
             )
 
     # def close(self) -> None:
-        # self._con.close()
+    # self._con.close()

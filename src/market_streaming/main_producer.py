@@ -2,9 +2,12 @@ import os
 
 from market_streaming.application.producer_services import MarketTickProducerService
 from market_streaming.infrastructure.csv_tick_source import CsvTickSource
-from market_streaming.infrastructure.kafka_tick_publisher import ConfluentKafkaTickPublisher
+from market_streaming.infrastructure.kafka_tick_publisher import (
+    ConfluentKafkaTickPublisher,
+)
 
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "market_indices_raw")  # ✅ TEST SUPPORT
+
 
 def build_producer_service() -> MarketTickProducerService:
     source = CsvTickSource(csv_path="data/indices_sample.csv")
@@ -20,9 +23,11 @@ def build_producer_service() -> MarketTickProducerService:
         progress_interval=10,
     )
 
+
 def main() -> None:
     service = build_producer_service()
     service.run()
+
 
 if __name__ == "__main__":
     main()

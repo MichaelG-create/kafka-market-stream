@@ -24,7 +24,9 @@ class JsonFileLogger(LoggerPort):
             handler.setFormatter(logging.Formatter("%(message)s"))
             self._logger.addHandler(handler)
 
-    def _emit(self, level: str, event: str, fields: Optional[Mapping[str, Any]]) -> None:
+    def _emit(
+        self, level: str, event: str, fields: Optional[Mapping[str, Any]]
+    ) -> None:
         payload = {
             "ts": datetime.utcnow().isoformat() + "Z",
             "level": level,

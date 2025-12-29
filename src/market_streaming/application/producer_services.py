@@ -1,5 +1,3 @@
-import csv
-import json
 import time
 from typing import Iterable, Protocol
 
@@ -9,18 +7,15 @@ from market_streaming.domain.models import MarketTick
 class TickSource(Protocol):
     """Port for reading MarketTick objects (e.g., from CSV)."""
 
-    def read_ticks(self) -> Iterable[MarketTick]:
-        ...
+    def read_ticks(self) -> Iterable[MarketTick]: ...
 
 
 class TickPublisher(Protocol):
     """Port for publishing MarketTick objects to some stream (Kafka)."""
 
-    def publish(self, tick: MarketTick) -> None:
-        ...
+    def publish(self, tick: MarketTick) -> None: ...
 
-    def flush(self) -> None:
-        ...
+    def flush(self) -> None: ...
 
 
 class MarketTickProducerService:
@@ -52,7 +47,10 @@ class MarketTickProducerService:
                 self._publisher.publish(tick)
                 messages_sent += 1
 
-                if self._progress_interval > 0 and messages_sent % self._progress_interval == 0:
+                if (
+                    self._progress_interval > 0
+                    and messages_sent % self._progress_interval == 0
+                ):
                     print(
                         f"✉️  Sent {messages_sent} messages "
                         f"(last: {tick.symbol} @ {tick.price})"
@@ -61,7 +59,7 @@ class MarketTickProducerService:
                 if self._delay_seconds > 0:
                     time.sleep(self._delay_seconds)
 
-            except Exception as exc:
+            except Exception as exc:  # pylint: disable=broad-exception-caught
                 print(f"❌ Error sending tick {tick}: {exc}")
                 errors += 1
 

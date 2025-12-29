@@ -1,14 +1,16 @@
 from flask import Flask, jsonify
 import duckdb
-from datetime import datetime
 import pandas as pd
+
 app = Flask(__name__)
 
-@app.route('/metrics')
+
+@app.route("/metrics")
 def metrics():
     try:
-        con = duckdb.connect('/data/market_data.duckdb')
-        df = con.execute("""
+        con = duckdb.connect("/data/market_data.duckdb")
+        df = con.execute(
+            """
             SELECT 
                 symbol, 
                 COUNT(*) as tick_count, 
@@ -16,20 +18,23 @@ def metrics():
                 ROUND(MAX(price), 2) as max_price, 
                 ROUND(MIN(price), 2) as min_price
             FROM market_ticks GROUP BY symbol
-        """).df()
+        """
+        ).df()
         con.close()
         # ADD TIME IN PYTHON (Grafana loves it)
-        df['time'] = pd.Timestamp.now().isoformat()
-        return jsonify(df.to_dict('records'))
+        df["time"] = pd.Timestamp.now().isoformat()
+        return jsonify(df.to_dict("records"))
     except Exception as e:
         return jsonify([{"error": str(e)}])
-    
-@app.route('/live')
+
+
+@app.route("/live")
 def live():
     try:
-        con = duckdb.connect('/data/market_data.duckdb')
-        
-        df = con.execute("""
+        con = duckdb.connect("/data/market_data.duckdb")
+
+        df = con.execute(
+            """
             WITH recent_data AS (
                 SELECT ts, symbol, price, volume
                 FROM market_ticks 
@@ -55,16 +60,18 @@ def live():
             FROM recent_data
             GROUP BY ts
             ORDER BY ts DESC
-        """).df()
-        
+        """
+        ).df()
+
         con.close()
-        
+
         # Format timestamp
-        df['time'] = pd.to_datetime(df['time']).dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-        
-        return jsonify(df.to_dict('records'))
+        df["time"] = pd.to_datetime(df["time"]).dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+        return jsonify(df.to_dict("records"))
     except Exception as e:
         return jsonify([{"error": str(e)}])
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)

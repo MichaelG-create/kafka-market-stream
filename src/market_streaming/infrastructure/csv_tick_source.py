@@ -22,6 +22,6 @@ class CsvTickSource(TickSource):
                         price=float(row["price"]),
                         volume=int(row["volume"]),
                     )
-        except FileNotFoundError as exc:
+        except FileNotFoundError:
             print(f"❌ CSV file not found: {self._csv_path}")
             raise

@@ -4,20 +4,25 @@ import os
 from market_streaming.application.consumer_services import MarketTickConsumerService
 from market_streaming.infrastructure.kafka_consumer import ConfluentKafkaMessageConsumer
 from market_streaming.infrastructure.duckdb_repository import DuckDBTickRepository
-from market_streaming.infrastructure.duckdb_metrics_repository import DuckDBMetricsRepository
+from market_streaming.infrastructure.duckdb_metrics_repository import (
+    DuckDBMetricsRepository,
+)
 from market_streaming.infrastructure.json_file_logger import JsonFileLogger
 from market_streaming.cli_helpers import print_run_metrics
 
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "market_indices_raw")  # ✅ TEST SUPPORT
 
-running = True
+running = {"value": True}
 
-def handle_signal(signum, frame):
-    global running
-    running = False
+
+def handle_signal(_signum, _frame):
+    """Signal handler to request a graceful shutdown."""
+    running["value"] = False
+
 
 signal.signal(signal.SIGINT, handle_signal)
 signal.signal(signal.SIGTERM, handle_signal)
+
 
 def build_consumer_service() -> MarketTickConsumerService:
     kafka_consumer = ConfluentKafkaMessageConsumer(
@@ -36,17 +41,19 @@ def build_consumer_service() -> MarketTickConsumerService:
         logger=logger,
     )
 
+
 def main() -> None:
     service = build_consumer_service()
 
     def should_run() -> bool:
-        return running
+        return running["value"]
 
     metrics = service.run(
         should_run=should_run,
         idle_timeout_seconds=30.0,
     )
     print_run_metrics(metrics)
+
 
 if __name__ == "__main__":
     main()

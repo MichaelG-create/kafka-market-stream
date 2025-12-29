@@ -1,7 +1,5 @@
 # src/market_streaming/cli_helpers.py
 
-from typing import Optional
-
 from market_streaming.application.ports import RunMetrics
 
 

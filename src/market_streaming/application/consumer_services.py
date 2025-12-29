@@ -35,7 +35,11 @@ class MarketTickConsumerService:
         idle_timeout_seconds: float = 60.0,
     ) -> RunMetrics:
         if should_run is None:
-            should_run = lambda: True
+
+            def _always_run() -> bool:
+                return True
+
+            should_run = _always_run
 
         messages_processed = 0
         errors = 0
@@ -104,7 +108,7 @@ class MarketTickConsumerService:
                         print("ℹ️  Reached max_messages limit, stopping consumer.")
                         break
 
-                except Exception as exc:
+                except Exception as exc:  # pylint: disable=broad-exception-caught
                     errors += 1
                     self._logger.error(
                         "message_processing_error",
@@ -119,7 +123,7 @@ class MarketTickConsumerService:
             print("\n⚠️  Interrupted by user")
         finally:
             self._consumer.close()
-            self._sink.close()  
+            self._sink.close()
             self._metrics_sink.close()
             end_time = time.time()
             run_ended_at = datetime.utcnow().isoformat()

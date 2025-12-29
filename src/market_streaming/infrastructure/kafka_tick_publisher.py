@@ -1,13 +1,13 @@
 import json
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
-from confluent_kafka import Producer, KafkaException  # type: ignore
+from confluent_kafka import Producer, KafkaException, KafkaError  # type: ignore
 
 from market_streaming.domain.models import MarketTick
 from market_streaming.application.producer_services import TickPublisher
 
 
-def default_delivery_report(err, msg) -> None:
+def default_delivery_report(err, _msg) -> None:
     if err is not None:
         print(f"❌ Message delivery failed: {err}")
 
@@ -21,7 +21,9 @@ class ConfluentKafkaTickPublisher(TickPublisher):
         delivery_callback: Optional[Callable[[Optional[Exception], str], None]] = None,
     ) -> None:
         self._topic_name = topic_name
-        self._delivery_callback = delivery_callback or (lambda err, _topic: default_delivery_report(err, None))
+        self._delivery_callback = delivery_callback or (
+            lambda err, _topic: default_delivery_report(err, None)
+        )
 
         conf = {
             "bootstrap.servers": bootstrap_servers,
@@ -38,10 +40,10 @@ class ConfluentKafkaTickPublisher(TickPublisher):
             print(f"❌ Failed to create producer: {e}")
             raise
 
-    def _on_delivery(self, err, msg) -> None:
+    def _on_delivery(self, err: KafkaError | None, _msg: Any) -> None:
         # Delegate to higher-level callback (only pass err + topic name)
         if self._delivery_callback is not None:
-            self._delivery_callback(err, msg.topic())
+            self._delivery_callback(err, _msg.topic())
 
     def publish(self, tick: MarketTick) -> None:
         message_json = json.dumps(tick.to_dict())
