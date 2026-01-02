@@ -305,3 +305,8 @@ The consumer records run‑level pipeline metrics and structured logs to support
 These metrics can be used for future Grafana panels tracking throughput, error rates, and run duration.
 
 ---
+## Inspiration & related work
+
+This prototype mirrors common streaming patterns where Kafka handles ingestion and DuckDB provides an embedded analytics store refreshed by micro‑batches or streaming jobs.
+
+Similar ideas appear in public examples that join Kafka topics and land the results into analytical stores exposed to BI tools, which aligns with this project’s Kafka → DuckDB → Grafana path. 
