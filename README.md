@@ -9,7 +9,7 @@
 
 The project simulates a real‑time **market indices** feed (SP500, STOXX600, NIKKEI225) and demonstrates a complete path:
 
-`CSV → Kafka → DuckDB → HTTP API → Grafana (Infinity datasource)`.
+![kafka-market-stream workflow](docs/excalidraw-diags/kafka-grafana-workflow.png)
 
 It is structured as a Python package with separate **domain**, **application services**, **infrastructure adapters**, and a small **API + dashboards** layer, plus CI smoke tests on GitHub Actions.
 
