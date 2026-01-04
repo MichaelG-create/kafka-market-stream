@@ -13,6 +13,7 @@ The project simulates a real‑time **market indices** feed (SP500, STOXX600, NI
 
 It is structured as a Python package with separate **domain**, **application services**, **infrastructure adapters**, and a small **API + dashboards** layer, plus CI smoke tests on GitHub Actions.
 
+
 ---
 
 ## How to run the stack
