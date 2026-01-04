@@ -13,7 +13,6 @@ The project simulates a real‑time **market indices** feed (SP500, STOXX600, NI
 
 It is structured as a Python package with separate **domain**, **application services**, **infrastructure adapters**, and a small **API + dashboards** layer, plus CI smoke tests on GitHub Actions.
 
-
 ---
 
 ## How to run the stack
@@ -63,6 +62,7 @@ This section starts the full stack locally: Kafka, the Python pipeline, DuckDB, 
 ---
 
 ## Grafana dashboards (Infinity datasource)
+![kafka-market-stream dashboard](docs/kafka-grafana-dashboard.png)
 
 Grafana reads directly from the Flask API using the **Yesoreyeram Infinity** datasource.
 
